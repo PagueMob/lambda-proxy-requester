@@ -1,0 +1,17 @@
+service: lambda-proxy-requester
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+functions:
+  proxy:
+    handler: src/handler.proxy
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
