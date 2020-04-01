@@ -1,0 +1,27 @@
+service: ${self:custom.stage}-lambda-proxy-requester
+
+plugins:
+  - serverless-offline
+
+custom:
+  stage: ${opt:stage, "sandbox"}
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: sandbox
+  region: us-east-1
+  vpc:
+    securityGroupIds:
+      - ${env:SECURITY_GROUP_ID}
+    subnetIds:
+      "Fn::Split":
+          - ","
+          - ${env:SUBNET_IDS}
+functions:
+  proxy:
+    handler: src/handler.proxy
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true

@@ -1,0 +1,19 @@
+{
+  "name": "lambda-proxy-requester",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "dependencies": {
+    "axios": "^0.19.2"
+  },
+  "devDependencies": {
+    "serverless": "^1.67.0",
+    "serverless-offline": "^6.1.2"
+  },
+  "scripts": {
+    "local": "sls offline",
+    "deploy": "sls deploy"
+  },
+  "author": "gustblima",
+  "license": "ISC"
+}
