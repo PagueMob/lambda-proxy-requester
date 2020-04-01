@@ -1,25 +1,18 @@
 const axios = require('axios')
+require('axios-debug-log')
 
 const proxy = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
   const { queryStringParameters, httpMethod, body, headers } = event
   const url = parseQueryStringToUrl(queryStringParameters)
-
-  console.log(`Request ${httpMethod} at URL: ${url}`)
   try {
-    const response = await axios({
-      method: httpMethod,
-      data: body,
-      url: url,
-      headers,
-      crossdomain: true
-    })
+    const response = await httpRequest(url, httpMethod, body, headers)
     return buildResponse(response.statusCode, response.data)
   } catch (e) {
     console.log(`Error:`, e)
-    const status = e.status || 500
+    const status = e.status || e.response ? e.response.status : 500
     return buildResponse(status, {
-      error: e.code
+      error: e.response ? e.response.data : e.code
     })
   }
 }
