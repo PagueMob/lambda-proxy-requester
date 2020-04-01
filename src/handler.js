@@ -1,10 +1,10 @@
 const axios = require('axios')
-const https = require('https')
+
 const proxy = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
   const { queryStringParameters, httpMethod, body, headers } = event
-
   const url = parseQueryStringToUrl(queryStringParameters)
+
   console.log(`Request ${httpMethod} at URL: ${url}`)
   try {
     const response = await axios({
