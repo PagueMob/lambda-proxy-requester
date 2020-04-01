@@ -5,11 +5,6 @@ plugins:
 
 custom:
   stage: ${opt:stage, "sandbox"}
-  vpc:
-    securityGroupIds:
-      sandbox: "sg-0640f5279a5f28c98"
-    subnetIds:
-      sandbox: "subnet-d4cdfdfb, subnet-ef4cfa81"
 provider:
   name: aws
   runtime: nodejs10.x
@@ -17,11 +12,11 @@ provider:
   region: us-east-1
   vpc:
     securityGroupIds:
-      - ${self:custom.vpc.securityGroupIds.${self:custom.stage}}
+      - ${env:SECURITY_GROUP_ID}
     subnetIds:
       "Fn::Split":
           - ","
-          - ${self:custom.vpc.subnetIds.${self:custom.stage}}
+          - ${env:SUBNET_IDS}
 functions:
   proxy:
     handler: src/handler.proxy
