@@ -6,8 +6,7 @@ require('axios-debug-log')
 const proxy = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
   const { queryStringParameters, pathParameters, httpMethod, body, headers } = event
-  console.log(`Request: `, {
-    method: httpMethod,
+  console.log(`Received: `, {
     pathParams: pathParameters,
     query: queryStringParameters,
     body: body,
@@ -20,6 +19,12 @@ const proxy = async (event, context) => {
       ...removeHeaders(headers, invalidHeaders),
       ["Host"]: getHostName(url)
     }
+    console.log(`Request: `, {
+      method: httpMethod,
+      url: url,
+      body: body,
+      headers: removeHeaders(cleanedHeaders, sensitiveHeaders, true)
+    })
     const response = await httpRequest(url, httpMethod, body, cleanedHeaders)
     console.log(`Response: `, {
       statusCode: response.status + ' (' + response.statusText + ')',
