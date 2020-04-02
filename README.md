@@ -10,5 +10,5 @@ and SUBNET_IDS as a list of subnets separated by comma (e.g.:subnetxxx,subnetxxy
 Now run ```npm run deploy```
 
 # How to use:
-  Send a request to the API passing your original request on `req` as querystring
-  `ex:localhost:3000?req=api.test.com`
+  Send a request to the API passing your original request as a path for the service
+  `ex:localhost:3000/sandbox/proxy/http[s]/api.test.com`
