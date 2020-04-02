@@ -22,15 +22,16 @@ const proxy = async (event, context) => {
     })
     return buildResponse(response.status, response.data)
   } catch (e) {
-    const status = e.response ? e.response.status + ' (' + e.response.statusText + ')' : e.status || 500
-    const body = e.response ? e.response.data : {
+    const hasResponse = !!e.response;
+    const status = hasResponse ? e.response.status + ' (' + e.response.statusText + ')' : e.status || 500
+    const body = hasResponse ? e.response.data : {
       error: e.code,
       message: e.message
     }
-    console.log(`Error:`, {
+    console.log(hasResponse ? `Response: ` : `Error:`, {
       statusCode: status,
       body: body,
-      headers: e.response ? e.response.headers : undefined
+      headers: hasResponse ? e.response.headers : undefined
     })
     return buildResponse(status, body)
   }
