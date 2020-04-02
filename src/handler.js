@@ -25,7 +25,8 @@ const proxy = async (event, context) => {
     console.log(`Error:`, e)
     const status = e.response ? e.response.status : e.status || 500
     const body = e.response ? e.response.data : {
-      error: e.code
+      error: e.code,
+      message: e.message
     }
     return buildResponse(status, body)
   }
