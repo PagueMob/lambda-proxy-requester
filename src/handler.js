@@ -1,5 +1,4 @@
 const axios = require('axios')
-require('axios-debug-log')
 
 const invalidHeaders = [
   'Host',
