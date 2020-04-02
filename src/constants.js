@@ -7,7 +7,7 @@ export const invalidHeaders = [
   'X-Forwarded-For',
   'X-Forwarded-Port',
   'X-Forwarded-Proto'
-]
+].map(item => (item.toLowerCase()))
 
 export const sensitiveHeaders = [
   'cookie',
@@ -16,5 +16,5 @@ export const sensitiveHeaders = [
   'auth',
   'secret',
   'key'
-]
+].map(item => (item.toLowerCase()))
 
