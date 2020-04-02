@@ -4,6 +4,13 @@ require('axios-debug-log')
 const proxy = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
   const { queryStringParameters, pathParameters, httpMethod, body, headers } = event
+  console.log(`Request: `, {
+    method: httpMethod,
+    pathParams: pathParameters,
+    query: queryStringParameters,
+    body: body,
+    headers: headers
+  })
   const baseUrl = parsePathParametersToBaseUrl(pathParameters)
   const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})
   try {
