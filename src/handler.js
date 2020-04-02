@@ -1,4 +1,4 @@
-import { invalidHeaders } from './constants'
+import { invalidHeaders, sensitiveHeaders } from './constants'
 
 const axios = require('axios')
 require('axios-debug-log')
@@ -11,7 +11,7 @@ const proxy = async (event, context) => {
     pathParams: pathParameters,
     query: queryStringParameters,
     body: body,
-    headers: headers
+    headers: removeHeaders(headers, sensitiveHeaders, true)
   })
   const baseUrl = parsePathParametersToBaseUrl(pathParameters)
   const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})

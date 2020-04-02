@@ -9,3 +9,12 @@ export const invalidHeaders = [
   'X-Forwarded-Proto'
 ]
 
+export const sensitiveHeaders = [
+  'cookie',
+  'amz',
+  'token',
+  'auth',
+  'secret',
+  'key'
+]
+
