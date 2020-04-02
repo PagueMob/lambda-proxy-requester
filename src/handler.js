@@ -102,7 +102,7 @@ const getHostName = (url) => {
 
 const removeHeaders = (headers, toRemove, mask = false) => {
   const newHeader = Object.keys(headers).reduce((obj, key) => {
-    if (!toRemove.includes(key.toLowerCase())) {
+    if (!toRemove.find(r => key.toLowerCase().includes(r))) {
       obj[key] = headers[key]
     } else if (mask) {
       obj[key] = '*****'
