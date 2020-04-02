@@ -17,6 +17,8 @@ provider:
       "Fn::Split":
           - ","
           - ${env:SUBNET_IDS}
+envinronment:
+  DEBUG: axios
 functions:
   proxy:
     handler: src/handler.proxy
