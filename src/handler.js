@@ -1,20 +1,69 @@
 const axios = require('axios')
 require('axios-debug-log')
 
+const invalidHeaders = [
+  'Host',
+  'User-Agent',
+  'Via',
+  'X-Amz-Cf-Id',
+  'X-Amzn-Trace-Id',
+  'X-Forwarded-For',
+  'X-Forwarded-Port',
+  'X-Forwarded-Proto'
+].map(item => (item.toLowerCase()))
+
+const sensitiveHeaders = [
+  'cookie',
+  'amz',
+  'token',
+  'auth',
+  'secret',
+  'key'
+].map(item => (item.toLowerCase()))
+
 const proxy = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
   const { queryStringParameters, pathParameters, httpMethod, body, headers } = event
+  console.log(`Received: `, {
+    pathParams: pathParameters,
+    query: queryStringParameters,
+    body: body,
+    headers: removeHeaders(headers, sensitiveHeaders, true)
+  })
   const baseUrl = parsePathParametersToBaseUrl(pathParameters)
   const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})
   try {
-    const response = await httpRequest(url, httpMethod, body, headers)
-    return buildResponse(response.statusCode, response.data)
-  } catch (e) {
-    console.log(`Error:`, e)
-    const status = e.status || e.response ? e.response.status : 500
-    return buildResponse(status, {
-      error: e.response ? e.response.data : e.code
+    const cleanedHeaders = {
+      ...removeHeaders(headers, invalidHeaders),
+      ["Host"]: getHostName(url)
+    }
+    console.log(`Request: `, {
+      method: httpMethod,
+      url: url,
+      body: body,
+      headers: removeHeaders(cleanedHeaders, sensitiveHeaders, true)
     })
+    const response = await httpRequest(url, httpMethod, body, cleanedHeaders)
+    console.log(`Response: `, {
+      statusCode: response.status + ' (' + response.statusText + ')',
+      body: response.data,
+      headers: response.headers
+    })
+    return buildResponse(response.status, response.data)
+  } catch (e) {
+    const hasResponse = !!e.response;
+    const status = hasResponse ? e.response.status : e.status || 500
+    const logStatus = hasResponse ? e.response.status + ' (' + e.response.statusText + ')' : e.status || 500
+    const body = hasResponse ? e.response.data : {
+      error: e.code,
+      message: e.message
+    }
+    console.log(hasResponse ? `Response: ` : `Error:`, {
+      statusCode: logStatus,
+      body: body,
+      headers: hasResponse ? e.response.headers : undefined
+    })
+    return buildResponse(status, body)
   }
 }
 
@@ -42,10 +91,7 @@ const httpRequest = async (url, httpMethod, body, headers) => {
     method: httpMethod,
     data: body,
     url: url,
-    headers: {
-      ...removeInvalidHeaders(headers),
-      ["Host"]: getHostName(url)
-    }
+    headers: headers
   })
 }
 
@@ -54,20 +100,12 @@ const getHostName = (url) => {
   return matches && matches[1]
 }
 
-const removeInvalidHeaders = (headers) => {
-  const invalidHeaders = [
-    'Host',
-    'User-Agent',
-    'Via',
-    'X-Amz-Cf-Id',
-    'X-Amzn-Trace-Id',
-    'X-Forwarded-For',
-    'X-Forwarded-Port',
-    'X-Forwarded-Proto'
-  ]
+const removeHeaders = (headers, toRemove, mask = false) => {
   const newHeader = Object.keys(headers).reduce((obj, key) => {
-    if (!invalidHeaders.includes(key)) {
+    if (!toRemove.find(r => key.toLowerCase().includes(r))) {
       obj[key] = headers[key]
+    } else if (mask) {
+      obj[key] = '*****'
     }
     return obj
   }, {})
