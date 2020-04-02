@@ -15,6 +15,11 @@ const proxy = async (event, context) => {
   const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})
   try {
     const response = await httpRequest(url, httpMethod, body, headers)
+    console.log(`Response: `, {
+      statusCode: response.status + ' (' + response.statusText + ')',
+      body: response.data,
+      headers: response.headers
+    })
     return buildResponse(response.status, response.data)
   } catch (e) {
     console.log(`Error:`, e)
