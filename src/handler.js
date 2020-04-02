@@ -1,3 +1,5 @@
+import { invalidHeaders } from './constants'
+
 const axios = require('axios')
 require('axios-debug-log')
 
@@ -15,7 +17,7 @@ const proxy = async (event, context) => {
   const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})
   try {
     const cleanedHeaders = {
-      ...removeInvalidHeaders(headers),
+      ...removeHeaders(headers, invalidHeaders),
       ["Host"]: getHostName(url)
     }
     const response = await httpRequest(url, httpMethod, body, cleanedHeaders)
@@ -75,19 +77,9 @@ const getHostName = (url) => {
   return matches && matches[1]
 }
 
-const removeInvalidHeaders = (headers) => {
-  const invalidHeaders = [
-    'Host',
-    'User-Agent',
-    'Via',
-    'X-Amz-Cf-Id',
-    'X-Amzn-Trace-Id',
-    'X-Forwarded-For',
-    'X-Forwarded-Port',
-    'X-Forwarded-Proto'
-  ]
+const removeHeaders = (headers, toRemove) => {
   const newHeader = Object.keys(headers).reduce((obj, key) => {
-    if (!invalidHeaders.includes(key)) {
+    if (!toRemove.includes(key)) {
       obj[key] = headers[key]
     }
     return obj
