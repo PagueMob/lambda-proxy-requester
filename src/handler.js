@@ -3,8 +3,10 @@ require('axios-debug-log')
 
 const proxy = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
-  const { queryStringParameters, httpMethod, body, headers } = event
-  const url = parseQueryStringToUrl(queryStringParameters)
+  const { queryStringParameters, pathParameters, httpMethod, body, headers } = event
+  console.log(event)
+  const baseUrl = parsePathParametersToBaseUrl(pathParameters)
+  const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})
   try {
     const response = await httpRequest(url, httpMethod, body, headers)
     return buildResponse(response.statusCode, response.data)
@@ -22,9 +24,18 @@ const buildResponse = (statusCode, body) => ({
   body: JSON.stringify(body)
 })
 
-const parseQueryStringToUrl = (queryStrings) => {
-  const { req, ...params } = queryStrings
-  return Object.keys(params).reduce((url, query) => `${url}&${query}=${params[query]}`, req)
+const createFullUrlWithQueryStrings = (baseUrl, queryStrings) => {
+  return Object.keys(queryStrings).reduce((url, query) => `${url}&${query}=${queryStrings[query]}`, baseUrl + '?')
+}
+
+const parsePathParametersToBaseUrl = (pathParameters) => {
+  const { proxy } = pathParameters
+  let url = proxy.replace('proxy/', '')
+  const hasHttpDefined = url.includes('http/') || url.includes('https/')
+  if (hasHttpDefined) {
+    url = url.replace('/', '://')
+  }
+  return url
 }
 
 const httpRequest = async (url, httpMethod, body, headers) => {
