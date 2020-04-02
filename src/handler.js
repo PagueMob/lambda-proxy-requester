@@ -14,7 +14,11 @@ const proxy = async (event, context) => {
   const baseUrl = parsePathParametersToBaseUrl(pathParameters)
   const url = createFullUrlWithQueryStrings(baseUrl, queryStringParameters || {})
   try {
-    const response = await httpRequest(url, httpMethod, body, headers)
+    const cleanedHeaders = {
+      ...removeInvalidHeaders(headers),
+      ["Host"]: getHostName(url)
+    }
+    const response = await httpRequest(url, httpMethod, body, cleanedHeaders)
     console.log(`Response: `, {
       statusCode: response.status + ' (' + response.statusText + ')',
       body: response.data,
@@ -62,10 +66,7 @@ const httpRequest = async (url, httpMethod, body, headers) => {
     method: httpMethod,
     data: body,
     url: url,
-    headers: {
-      ...removeInvalidHeaders(headers),
-      ["Host"]: getHostName(url)
-    }
+    headers: headers
   })
 }
 
